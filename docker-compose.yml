@@ -1,0 +1,36 @@
+services:
+
+  db:
+    image: mysql:8.0.28
+    container_name: super-app-db
+    environment:
+      MYSQL_DATABASE: 'super-app'
+      MYSQL_ROOT_PASSWORD: 'password'
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: unless-stopped
+
+  node:
+    build: ./node
+    image: super-app-node:latest
+    container_name: super-app-node
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  php:
+    build: ./php
+    image: super-app-php:latest
+    container_name: super-app-php
+    ports:
+      - "80:80"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+volumes:
+  db_data:
