@@ -1,0 +1,42 @@
+name: Build and Push to Docker Hub
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push the Node image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./node
+          push: true
+          tags: |
+            ${{ vars.DOCKERHUB_USERNAME }}/super-app-node:latest
+            ${{ vars.DOCKERHUB_USERNAME }}/super-app-node:${{ github.sha }}
+
+      - name: Build and push the PHP image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./php
+          push: true
+          tags: |
+            ${{ vars.DOCKERHUB_USERNAME }}/super-app-php:latest
+            ${{ vars.DOCKERHUB_USERNAME }}/super-app-php:${{ github.sha }}
